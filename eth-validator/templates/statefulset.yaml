@@ -2,6 +2,7 @@
 {{- $execution_endpoint := include "eth-validator.executionEndpoint" . }}
 {{- $beacon_nodes := include "eth-validator.beaconNodes" . }}
 {{- $beacon_pod := include "eth-validator.beaconPod" . }}
+{{- if .Values.geth.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -146,6 +147,8 @@ spec:
             storage: {{ .Values.geth.storage.size }}
         storageClassName: {{ .Values.geth.storage.class }}
 ---
+{{- end }}
+{{- if .Values.lighthouseBeacon.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -202,6 +205,10 @@ spec:
             {{- toYaml .Values.lighthouseBeacon.securityContext | nindent 12 }}
           image: "{{ .Values.lighthouseBeacon.image.repository }}:{{ .Values.lighthouseBeacon.image.tag | default "latest" }}"
           imagePullPolicy: {{ .Values.lighthouseBeacon.image.pullPolicy }}
+          {{- if .Values.lighthouseBeacon.repairMode }}
+          command: ["sleep"]
+          args: ["infinity"]
+          {{- else }}
           command: ["lighthouse"]
           args:
             - bn
@@ -244,11 +251,14 @@ spec:
             - --metrics
             - --metrics-address=0.0.0.0
             - --metrics-port={{ .Values.lighthouseBeacon.internal.metrics.port }}
+          {{- end }}
           env:
             {{- if .Values.lighthouseBeacon.rayonThreads }}
-              - name: RAYON_NUM_THREADS
-                value: "{{ .Values.lighthouseBeacon.rayonThreads }}"
+            - name: RAYON_NUM_THREADS
+              value: "{{ .Values.lighthouseBeacon.rayonThreads }}"
             {{- end }}
+            - name: EXECUTION_ENDPOINT
+              value: {{ $execution_endpoint }}
           ports:
             - name: http-api
               containerPort: {{ .Values.lighthouseBeacon.internal.api.port }}
@@ -308,6 +318,8 @@ spec:
             storage: {{ .Values.lighthouseBeacon.storage.size }}
         storageClassName: {{ .Values.lighthouseBeacon.storage.class }}
 ---
+{{- end }}
+{{- if .Values.lighthouseValidator.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -434,3 +446,4 @@ spec:
           requests:
             storage: {{ .Values.lighthouseValidator.storage.size }}
         storageClassName: {{ .Values.lighthouseValidator.storage.class }}
+{{- end }}

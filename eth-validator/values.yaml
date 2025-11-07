@@ -3,38 +3,31 @@
 # Declare variables to be passed into your templates.
 
 affinity: {}
-
 autoscaling:
   enabled: false
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
-
 externalIp: ""
 fullnameOverride: ""
 
 geth:
   affinity: {}
-
   cache: 4096
-
   disableHistory: true
-
+  enabled: true
   external:
     annotations: {}
     type: LoadBalancer
     p2p:
       port: 30303
-
   image:
     repository: ethereum/client-go
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: "latest"
-
   imagePullSecrets: []
-
   internal:
     annotations: {}
     type: ClusterIP
@@ -44,14 +37,11 @@ geth:
       port: 8551
     metrics:
       port: 6060
-
   maxPeers: 0
-
   nodeSelector: {}
   podAnnotations: {}
   podSecurityContext: {}
   replicaCount: 1
-
   resources:
     limits:
       cpu: 3
@@ -59,13 +49,10 @@ geth:
     requests:
       cpu: 3
       memory: 10G
-    
   securityContext: {}
-
   storage:
     class: "default"
     size: "600G"
-  
 ingress:
   enabled: false
   className: ""
@@ -85,25 +72,20 @@ ingress:
 lighthouseBeacon:
   affinity: {}
   asyncAPI: true
-
   checkpointSyncUrl: ""
-
+  enabled: true
   external:
     annotations: {}
     type: LoadBalancer
     p2p:
       port: 31400
-
   gui: false
-
   image:
     repository: sigp/lighthouse
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: "latest"
-
   imagePullSecrets: []
-
   internal:
     annotations: {}
     type: ClusterIP
@@ -111,7 +93,6 @@ lighthouseBeacon:
       port: 5052
     metrics:
       port: 5054
-
   mev:
     enabled: true
     port: 18550
@@ -121,18 +102,14 @@ lighthouseBeacon:
       pullPolicy: IfNotPresent
       # Overrides the image tag whose default is the chart appVersion.
       tag: "latest"
-
     imagePullSecrets: []
     securityContext: {}
-
+  repairMode: false
   nodeSelector: {}
   podAnnotations: {}
   podSecurityContext: {}
-
   rayonThreads: 0
-
   replicaCount: 1
-
   resources:
     limits:
       cpu: 4
@@ -140,29 +117,22 @@ lighthouseBeacon:
     requests:
       cpu: 4
       memory: 16G
-    
   securityContext: {}
-
   stateCacheSize: 0
-
   storage:
     class: "default"
     size: "250G"
-  
   targetPeers: 0
   timeoutMultiplier: 0
 
-
 lighthouseValidator:
   affinity: {}
-
+  enabled: true
   image:
     pullPolicy: IfNotPresent
     repository: wateim/lighthouse-launch
     tag: "latest"
-
   imagePullSecrets: []
-
   internal:
     api:
       port: 5052
@@ -172,13 +142,11 @@ lighthouseValidator:
       port: 5000
     metrics:
       port: 5054
-
   loglevel: ""
   nodeSelector: {}
   podAnnotations: {}
   podSecurityContext: {}
   replicaCount: 1
-
   resources:
     limits:
       cpu: 1
@@ -186,21 +154,16 @@ lighthouseValidator:
     requests:
       cpu: 1
       memory: 2G
-
   secretsDir:
     useFlag: true
     mountPath: "/secrets"
-
   securityContext: {}
-    
   storage:
     class: "default"
     size: "2G"
-
 nameOverride: ""
 network: "hoodi"
 nodeSelector: {}
-
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
@@ -209,5 +172,4 @@ serviceAccount:
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
-
 tolerations: []
