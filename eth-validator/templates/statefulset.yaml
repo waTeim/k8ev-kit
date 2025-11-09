@@ -2,7 +2,8 @@
 {{- $execution_endpoint := include "eth-validator.executionEndpoint" . }}
 {{- $beacon_nodes := include "eth-validator.beaconNodes" . }}
 {{- $beacon_pod := include "eth-validator.beaconPod" . }}
-{{- if .Values.geth.enabled }}
+{{- $jwtSecretName := include "eth-validator.jwtSecretName" . }}
+{{- if and .Values.geth.enabled (not .Values.externalNode.enabled) }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -131,7 +132,7 @@ spec:
       volumes:
         - name: auth-jwt
           secret:
-            secretName: {{ include "eth-validator.fullname" . }}-auth-jwt
+            secretName: {{ $jwtSecretName }}
         - name: config
           configMap:
             name: {{ include "eth-validator.fullname" . }}-geth-config
@@ -148,7 +149,7 @@ spec:
         storageClassName: {{ .Values.geth.storage.class }}
 ---
 {{- end }}
-{{- if .Values.lighthouseBeacon.enabled }}
+{{- if and .Values.lighthouseBeacon.enabled (not .Values.externalNode.enabled) }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -305,7 +306,7 @@ spec:
       volumes:
         - name: auth-jwt
           secret:
-            secretName: {{ include "eth-validator.fullname" . }}-auth-jwt
+            secretName: {{ $jwtSecretName }}
   volumeClaimTemplates:
     - metadata:
         name: data
