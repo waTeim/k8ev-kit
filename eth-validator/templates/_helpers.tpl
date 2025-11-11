@@ -149,7 +149,11 @@ Beacon Pod
 */}}
 {{- define "eth-validator.beaconPod" -}}
 {{- if .Values.externalNode.enabled }}
+{{- if .Values.externalNode.releaseName }}
+{{- printf "%s-eth-validator-lighthouse-beacon-0" .Values.externalNode.releaseName }}
+{{- else }}
 {{- print "" }}
+{{- end }}
 {{- else }}
 {{- printf "%s-lighthouse-beacon-0" (include "eth-validator.fullname" .) }}
 {{- end }}
@@ -176,7 +180,7 @@ Usage: Provide externalNode.releaseName instead of explicit endpoint
 {{- if .Values.externalNode.executionPort }}
 {{- $port = .Values.externalNode.executionPort }}
 {{- end }}
-{{- printf "http://%s-geth:%d" .Values.externalNode.releaseName (int $port) }}
+{{- printf "http://%s-eth-validator-geth:%d" .Values.externalNode.releaseName (int $port) }}
 {{- else }}
 {{- .Values.externalNode.executionEndpoint }}
 {{- end }}
@@ -192,7 +196,7 @@ Usage: Provide externalNode.releaseName instead of explicit endpoint
 {{- if .Values.externalNode.beaconPort }}
 {{- $port = .Values.externalNode.beaconPort }}
 {{- end }}
-{{- printf "http://%s-lighthouse-beacon:%d" .Values.externalNode.releaseName (int $port) }}
+{{- printf "http://%s-eth-validator-lighthouse-beacon:%d" .Values.externalNode.releaseName (int $port) }}
 {{- else }}
 {{- .Values.externalNode.beaconEndpoint }}
 {{- end }}
