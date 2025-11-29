@@ -126,19 +126,78 @@ Create the name of the service account to use
 Execution Endpoint
 */}}
 {{- define "eth-validator.executionEndpoint" -}}
+{{- if .Values.externalNode.enabled }}
+{{- include "eth-validator.autoExecutionEndpoint" . }}
+{{- else }}
 {{- printf "http://%s-geth:%d" (include "eth-validator.fullname" .) (int .Values.geth.internal.auth.port) }}
+{{- end }}
 {{- end }}
 
 {{/*
 Beacon Nodes
 */}}
 {{- define "eth-validator.beaconNodes" -}}
+{{- if .Values.externalNode.enabled }}
+{{- include "eth-validator.autoBeaconEndpoint" . }}
+{{- else }}
 {{- printf "http://%s-lighthouse-beacon:%d" (include "eth-validator.fullname" .) (int .Values.lighthouseBeacon.internal.api.port) }}
+{{- end }}
 {{- end }}
 
 {{/*
 Beacon Pod
 */}}
 {{- define "eth-validator.beaconPod" -}}
+{{- if .Values.externalNode.enabled }}
+{{- if .Values.externalNode.releaseName }}
+{{- printf "%s-eth-validator-lighthouse-beacon-0" .Values.externalNode.releaseName }}
+{{- else }}
+{{- print "" }}
+{{- end }}
+{{- else }}
 {{- printf "%s-lighthouse-beacon-0" (include "eth-validator.fullname" .) }}
+{{- end }}
+{{- end }}
+
+{{/*
+JWT Secret Name
+*/}}
+{{- define "eth-validator.jwtSecretName" -}}
+{{- if .Values.externalNode.enabled }}
+{{- .Values.externalNode.jwtSecretName }}
+{{- else }}
+{{- printf "%s-auth-jwt" (include "eth-validator.fullname" .) }}
+{{- end }}
+{{- end }}
+
+{{/*
+Auto-generate external execution endpoint from release name
+Usage: Provide externalNode.releaseName instead of explicit endpoint
+*/}}
+{{- define "eth-validator.autoExecutionEndpoint" -}}
+{{- if .Values.externalNode.releaseName }}
+{{- $port := 8551 }}
+{{- if .Values.externalNode.executionPort }}
+{{- $port = .Values.externalNode.executionPort }}
+{{- end }}
+{{- printf "http://%s-eth-validator-geth:%d" .Values.externalNode.releaseName (int $port) }}
+{{- else }}
+{{- .Values.externalNode.executionEndpoint }}
+{{- end }}
+{{- end }}
+
+{{/*
+Auto-generate external beacon endpoint from release name
+Usage: Provide externalNode.releaseName instead of explicit endpoint
+*/}}
+{{- define "eth-validator.autoBeaconEndpoint" -}}
+{{- if .Values.externalNode.releaseName }}
+{{- $port := 5052 }}
+{{- if .Values.externalNode.beaconPort }}
+{{- $port = .Values.externalNode.beaconPort }}
+{{- end }}
+{{- printf "http://%s-eth-validator-lighthouse-beacon:%d" .Values.externalNode.releaseName (int $port) }}
+{{- else }}
+{{- .Values.externalNode.beaconEndpoint }}
+{{- end }}
 {{- end }}

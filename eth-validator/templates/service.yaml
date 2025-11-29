@@ -1,3 +1,4 @@
+{{- if and .Values.geth.enabled (not .Values.externalNode.enabled) }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -50,6 +51,8 @@ spec:
   selector:
     {{- include "eth-validator-geth.selectorLabels" . | nindent 4 }}
 ---
+{{- end }}
+{{- if and .Values.lighthouseBeacon.enabled (not .Values.externalNode.enabled) }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -102,6 +105,8 @@ spec:
   selector:
     {{- include "eth-validator-lighthouse-beacon.selectorLabels" . | nindent 4 }}
 ---
+{{- end }}
+{{- if .Values.lighthouseValidator.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -129,3 +134,4 @@ spec:
       name: metrics
   selector:
     {{- include "eth-validator-lighthouse-validator.selectorLabels" . | nindent 4 }}
+{{- end }}

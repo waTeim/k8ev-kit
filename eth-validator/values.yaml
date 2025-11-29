@@ -3,38 +3,56 @@
 # Declare variables to be passed into your templates.
 
 affinity: {}
-
 autoscaling:
   enabled: false
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
-
 externalIp: ""
 fullnameOverride: ""
 
+# External node configuration
+# Use this to connect validators to a separate eth-validator deployment (node-only instance)
+# This allows deploying the same eth-validator chart multiple times:
+#   - Once as a "node" (geth + beacon enabled, validators disabled)
+#   - Once as "validators" (geth + beacon disabled, validators enabled)
+externalNode:
+  enabled: false
+
+  # OPTION 1: Automatic endpoint generation (RECOMMENDED)
+  # Provide the release name of the node deployment, endpoints are auto-generated
+  releaseName: ""  # e.g., "my-node"
+  # Optional: Override default ports if node instance uses non-standard ports
+  executionPort: 8551  # Geth auth port (default)
+  beaconPort: 5052     # Lighthouse beacon API port (default)
+
+  # OPTION 2: Explicit endpoints (fallback if releaseName not provided)
+  # Manually specify full endpoint URLs
+  # Example: "http://my-node-geth:8551" (where "my-node" is the release name)
+  executionEndpoint: ""
+  # Example: "http://my-node-lighthouse-beacon:5052"
+  beaconEndpoint: ""
+
+  # JWT secret name (must match the node instance)
+  # Create with: python tools/create_jwt.py --name <name>
+  jwtSecretName: ""
+
 geth:
   affinity: {}
-
   cache: 4096
-
   disableHistory: true
-
+  enabled: true
   external:
     annotations: {}
     type: LoadBalancer
     p2p:
       port: 30303
-
   image:
     repository: ethereum/client-go
     pullPolicy: IfNotPresent
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
-
+    tag: v1.16.7
   imagePullSecrets: []
-
   internal:
     annotations: {}
     type: ClusterIP
@@ -44,14 +62,11 @@ geth:
       port: 8551
     metrics:
       port: 6060
-
   maxPeers: 0
-
   nodeSelector: {}
   podAnnotations: {}
   podSecurityContext: {}
   replicaCount: 1
-
   resources:
     limits:
       cpu: 3
@@ -59,13 +74,10 @@ geth:
     requests:
       cpu: 3
       memory: 10G
-    
   securityContext: {}
-
   storage:
     class: "default"
-    size: "600G"
-  
+    size: "1500G"
 ingress:
   enabled: false
   className: ""
@@ -85,25 +97,20 @@ ingress:
 lighthouseBeacon:
   affinity: {}
   asyncAPI: true
-
   checkpointSyncUrl: ""
-
+  enabled: true
   external:
     annotations: {}
     type: LoadBalancer
     p2p:
       port: 31400
-
   gui: false
-
   image:
     repository: sigp/lighthouse
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
-
+    tag: v8.0.1
   imagePullSecrets: []
-
   internal:
     annotations: {}
     type: ClusterIP
@@ -111,7 +118,6 @@ lighthouseBeacon:
       port: 5052
     metrics:
       port: 5054
-
   mev:
     enabled: true
     port: 18550
@@ -120,19 +126,15 @@ lighthouseBeacon:
       repository: flashbots/mev-boost
       pullPolicy: IfNotPresent
       # Overrides the image tag whose default is the chart appVersion.
-      tag: "latest"
-
+      tag: "1.10.1"
     imagePullSecrets: []
     securityContext: {}
-
+  repairMode: false
   nodeSelector: {}
   podAnnotations: {}
   podSecurityContext: {}
-
   rayonThreads: 0
-
   replicaCount: 1
-
   resources:
     limits:
       cpu: 4
@@ -140,29 +142,22 @@ lighthouseBeacon:
     requests:
       cpu: 4
       memory: 16G
-    
   securityContext: {}
-
   stateCacheSize: 0
-
   storage:
     class: "default"
-    size: "250G"
-  
+    size: "300G"
   targetPeers: 0
   timeoutMultiplier: 0
 
-
 lighthouseValidator:
   affinity: {}
-
+  enabled: true
   image:
     pullPolicy: IfNotPresent
     repository: wateim/lighthouse-launch
-    tag: "latest"
-
+    tag: v1.3.0
   imagePullSecrets: []
-
   internal:
     api:
       port: 5052
@@ -172,13 +167,11 @@ lighthouseValidator:
       port: 5000
     metrics:
       port: 5054
-
   loglevel: ""
   nodeSelector: {}
   podAnnotations: {}
   podSecurityContext: {}
   replicaCount: 1
-
   resources:
     limits:
       cpu: 1
@@ -186,21 +179,21 @@ lighthouseValidator:
     requests:
       cpu: 1
       memory: 2G
-
+  # CRITICAL SLASHING PREVENTION:
+  # The secretsDir must point to UNIQUE validator keystores.
+  # NEVER deploy multiple pods using the same keystore files - this will cause slashing.
+  # Lighthouse doppelganger protection is enabled but takes time to activate.
+  # Best practice: Use different hostPath directories for different validator deployments
   secretsDir:
     useFlag: true
-    mountPath: "/secrets"
-
+    mountPath: "/secrets"  # MUST be unique per validator deployment!
   securityContext: {}
-    
   storage:
     class: "default"
     size: "2G"
-
 nameOverride: ""
 network: "hoodi"
 nodeSelector: {}
-
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
@@ -209,5 +202,4 @@ serviceAccount:
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
-
 tolerations: []
