@@ -1,0 +1,50 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: gossipsub-topic-stats
+  namespace: infra          # <-- your namespace
+  labels:
+    app: kube-prometheus-stack
+    release: prometheus     # <-- your Helm release name
+    role: server-rules      # optional, but matches common defaults
+spec:
+  groups:
+    - name: gossipsub_topic_stats
+      interval: 30s
+      rules:
+        # Per-topic 5m avg
+        - record: gossipsub_topic_peers_5m_avg
+          expr: |
+            avg_over_time(
+              gossipsub_topic_peers_counts{
+                hash!~ ".*attester_slashing.*|.*beacon_aggregate_and_proof.*|.*beacon_block.*|.*proposer_slashing.*|.*voluntary_exit.*|.*sync_committee_contribution_and_proof.*|.*bls_to_execution.*|.*light_client.*|.*blob_sidecar.*|.*data_column_sidecar.*"
+              }[5m]
+            )
+
+        # Min topic size (5m avg) across topics
+        - record: gossipsub_topic_peers_5m_min
+          expr: |
+            min without (hash) (
+              gossipsub_topic_peers_5m_avg
+            )
+
+        # Mean topic size (5m avg) across topics
+        - record: gossipsub_topic_peers_5m_mean
+          expr: |
+            avg without (hash) (
+              gossipsub_topic_peers_5m_avg
+            )
+
+        # Stddev across topics (5m avg)
+        - record: gossipsub_topic_peers_5m_stddev
+          expr: |
+            stddev without (hash) (
+              gossipsub_topic_peers_5m_avg
+            )
+
+        # Max topic size (5m avg) across topics
+        - record: gossipsub_topic_peers_5m_max
+          expr: |
+            max without (hash) (
+              gossipsub_topic_peers_5m_avg
+            )
