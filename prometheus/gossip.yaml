@@ -12,39 +12,86 @@ spec:
     - name: gossipsub_topic_stats
       interval: 30s
       rules:
-        # Per-topic 5m avg
-        - record: gossipsub_topic_peers_5m_avg
+        # -----------------------------------------------------------------------------
+        # Set 1: "attest" topics (everything except excluded types, including no das)
+        # Window: 384s (1 epoch)
+        # -----------------------------------------------------------------------------
+
+        # Per-topic 384s (epoch) avg
+        - record: gossip_attest_peers_epoch_avg
           expr: |
             avg_over_time(
               gossipsub_topic_peers_counts{
                 hash!~ ".*attester_slashing.*|.*beacon_aggregate_and_proof.*|.*beacon_block.*|.*proposer_slashing.*|.*voluntary_exit.*|.*sync_committee_contribution_and_proof.*|.*bls_to_execution.*|.*light_client.*|.*blob_sidecar.*|.*data_column_sidecar.*"
-              }[5m]
+              }[384s]
             )
 
-        # Min topic size (5m avg) across topics
-        - record: gossipsub_topic_peers_5m_min
+        # Min topic size (epoch avg) across topics
+        - record: gossip_attest_peers_epoch_min
           expr: |
             min without (hash) (
-              gossipsub_topic_peers_5m_avg
+              gossip_attest_peers_epoch_avg
             )
 
-        # Mean topic size (5m avg) across topics
-        - record: gossipsub_topic_peers_5m_mean
+        # Mean topic size (epoch avg) across topics
+        - record: gossip_attest_peers_epoch_mean
           expr: |
             avg without (hash) (
-              gossipsub_topic_peers_5m_avg
+              gossip_attest_peers_epoch_avg
             )
 
-        # Stddev across topics (5m avg)
-        - record: gossipsub_topic_peers_5m_stddev
+        # Stddev across topics (epoch avg)
+        - record: gossip_attest_peers_epoch_stddev
           expr: |
             stddev without (hash) (
-              gossipsub_topic_peers_5m_avg
+              gossip_attest_peers_epoch_avg
             )
 
-        # Max topic size (5m avg) across topics
-        - record: gossipsub_topic_peers_5m_max
+        # Max topic size (epoch avg) across topics
+        - record: gossip_attest_peers_epoch_max
           expr: |
             max without (hash) (
-              gossipsub_topic_peers_5m_avg
+              gossip_attest_peers_epoch_avg
+            )
+
+        # -----------------------------------------------------------------------------
+        # Set 2: ONLY data_column_sidecar.* topics (DAS)
+        # Window: 384s (1 epoch)
+        # -----------------------------------------------------------------------------
+
+        # Per-topic 384s (epoch) avg for data_column_sidecar.* only
+        - record: gossip_das_peers_epoch_avg
+          expr: |
+            avg_over_time(
+              gossipsub_topic_peers_counts{
+                hash=~".*data_column_sidecar.*"
+              }[384s]
+            )
+
+        # Min topic size (epoch avg) across data_column_sidecar.* topics
+        - record: gossip_das_peers_epoch_min
+          expr: |
+            min without (hash) (
+              gossip_das_peers_epoch_avg
+            )
+
+        # Mean topic size (epoch avg) across data_column_sidecar.* topics
+        - record: gossip_das_peers_epoch_mean
+          expr: |
+            avg without (hash) (
+              gossip_das_peers_epoch_avg
+            )
+
+        # Stddev across data_column_sidecar.* topics (epoch avg)
+        - record: gossip_das_peers_epoch_stddev
+          expr: |
+            stddev without (hash) (
+              gossip_das_peers_epoch_avg
+            )
+
+        # Max topic size (epoch avg) across data_column_sidecar.* topics
+        - record: gossip_das_peers_epoch_max
+          expr: |
+            max without (hash) (
+              gossip_das_peers_epoch_avg
             )
