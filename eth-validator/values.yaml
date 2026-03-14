@@ -51,7 +51,7 @@ geth:
   image:
     repository: ethereum/client-go
     pullPolicy: IfNotPresent
-    tag: v1.16.7
+    tag: v1.17.1
   imagePullSecrets: []
   internal:
     annotations: {}
@@ -109,7 +109,7 @@ lighthouseBeacon:
     repository: sigp/lighthouse
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: v8.0.0
+    tag: v8.1.2
   imagePullSecrets: []
   internal:
     annotations: {}
@@ -126,7 +126,7 @@ lighthouseBeacon:
       repository: flashbots/mev-boost
       pullPolicy: IfNotPresent
       # Overrides the image tag whose default is the chart appVersion.
-      tag: "1.10"
+      tag: "1.12"
     imagePullSecrets: []
     securityContext: {}
   repairMode: false
@@ -156,7 +156,7 @@ lighthouseValidator:
   image:
     pullPolicy: IfNotPresent
     repository: wateim/lighthouse-launch
-    tag: v1.3.0
+    tag: v1.4.1
   imagePullSecrets: []
   internal:
     api:
