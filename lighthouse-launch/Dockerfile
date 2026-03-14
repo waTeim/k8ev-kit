@@ -3,8 +3,8 @@
 ########################
 # ▸ Build stage
 ########################
-ARG GO_VERSION=1.23
-ARG LH_IMAGE=sigp/lighthouse:v8.0.0
+ARG GO_VERSION=1.25
+ARG LH_IMAGE=sigp/lighthouse:v8.1.2
 FROM golang:${GO_VERSION} AS builder
 
 WORKDIR /app
