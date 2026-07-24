@@ -51,7 +51,7 @@ geth:
   image:
     repository: ethereum/client-go
     pullPolicy: IfNotPresent
-    tag: v1.17.1
+    tag: v1.17.2
   imagePullSecrets: []
   internal:
     annotations: {}
@@ -109,7 +109,7 @@ lighthouseBeacon:
     repository: sigp/lighthouse
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: v8.1.2
+    tag: v8.1.3
   imagePullSecrets: []
   internal:
     annotations: {}
